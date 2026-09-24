@@ -99,23 +99,61 @@ func (lista *listaEnlazada[T]) Iterador() IteradorLista[T]{
 	return &iteradorListaEnlazada[T]{lista: lista, actual: lista.primero, anterior: nil}
 }
 
-
-func (iterador *iteradorListaEnlazada[T]) VerActual() T {
-	panic("TODO: implementar VerActual")
+func (iterador iteradorListaEnlazada[T]) VerActual() T {
+	if !iterador.HayAlgoMas() {
+		panic("El iterador termino de iterar")
+	}
+	return iterador.actual.dato
 }
 
-func (iterador *iteradorListaEnlazada[T]) HayAlgoMas() bool {
-	panic("TODO: implementar HayAlgoMas")
+func (iterador iteradorListaEnlazada[T]) HayAlgoMas() bool {
+	return iterador.actual != nil
 }
 
-func (iterador *iteradorListaEnlazada[T]) Avanzar() {
-	panic("TODO: implementar Avanzar")
+func (iterador iteradorListaEnlazada[T]) Avanzar() {
+	if !iterador.HayAlgoMas() {
+		panic("El iterador termino de iterar")
+	}
+	iterador.actual = iterador.actual.prox
 }
 
-func (iterador *iteradorListaEnlazada[T]) Insertar(elemento T) {
-	panic("TODO: implementar Insertar")
+func (iterador iteradorListaEnlazada[T]) Insertar(elemento T) {
+	nodo := &nodoLista[T]{dato: elemento, prox: iterador.actual}
+	// Caso lista vacia
+	if iterador.lista.longitud == 0 {
+		iterador.lista.primero, iterador.lista.ultimo = nodo, nodo
+		// Iterador posicionado en el último elemento
+	} else if !iterador.HayAlgoMas() {
+		iterador.anterior.prox, iterador.lista.ultimo = nodo, nodo
+		// Iterador posicionado en el primer elemento
+	} else if iterador.anterior == nil {
+		iterador.lista.primero = nodo
+	} else {
+		iterador.anterior.prox = nodo
+	}
+	iterador.actual = nodo
+	iterador.lista.longitud += 1
 }
 
 func (iterador *iteradorListaEnlazada[T]) Borrar() T {
-	panic("TODO: implementar Borrar")
+	// Caso se finalizó de iterar o no tiene elementos
+	if !iterador.HayAlgoMas() {
+		panic("El iterador termino de iterar")
+	}
+	elemBorrado := iterador.VerActual()
+	// Caso solo había 1 elemento
+	if iterador.lista.longitud == 1 {
+		iterador.lista.primero, iterador.lista.ultimo = nil, nil
+		// Caso el siguiente elemento está vacío
+	} else if iterador.actual.prox == nil {
+		iterador.anterior.prox, iterador.lista.ultimo = nil, iterador.anterior
+		// Caso iterador en el primer elemento
+	} else if iterador.anterior == nil {
+		iterador.lista.primero = iterador.actual.prox
+	} else {
+		iterador.anterior.prox = iterador.actual.prox
+	}
+	iterador.actual = iterador.actual.prox
+	iterador.lista.longitud -= 1
+	return elemBorrado
 }
