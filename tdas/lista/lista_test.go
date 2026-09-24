@@ -114,9 +114,9 @@ func TestVolumenLista(t *testing.T) {
 	for i := 0; i <= volumenTest; i++ {
 		lista.InsertarPrimero(i)
 		require.Equal(t, i, lista.VerPrimero())
-		require.Equal(t, 1, lista.Largo())
+		require.Equal(t, 1+i, lista.Largo())
 	}
-	for k := volumenTest - 1; k >= 0; k-- {
+	for k := volumenTest; k >= 0; k-- {
 		require.Equal(t, k, lista.BorrarPrimero())
 	}
 	require.True(t, lista.EstaVacia())
@@ -181,6 +181,23 @@ func TestIterInterno(t *testing.T) {
 	require.Equal(t, 15, suma)
 }
 
+func TestIterInternoSinElems(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[bool]()
+	lista.InsertarPrimero(true)
+	lista.InsertarPrimero(true)
+	lista.InsertarPrimero(true)
+	lista.InsertarPrimero(true)
+	lista.InsertarPrimero(false)
+
+	cont, valorOpuesto := 0, true
+	lista.Iterar(func(valor bool) bool {
+		cont += 1
+		return valor == valorOpuesto
+	})
+
+	require.Equal(t, 1, cont)
+}
+
 func TestIterExterno(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 	lista.InsertarPrimero(5)
@@ -189,15 +206,135 @@ func TestIterExterno(t *testing.T) {
 	lista.InsertarPrimero(2)
 	lista.InsertarPrimero(1)
 
-	encontrado := false
 	for iter := lista.Iterador(); iter.HayAlgoMas(); iter.Avanzar() {
 		dato := iter.VerActual()
+		encontrado := false
 		for i := 0; i <= 6; i++ {
 			if dato == i+1 {
 				encontrado = true
 				break
 			}
 		}
+		require.Equal(t, true, encontrado)
 	}
-	require.Equal(t, true, encontrado)
+}
+
+func TestIterExtVacio(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[string]()
+	iter := lista.Iterador()
+
+	require.PanicsWithValue(t, "El iterador termino de iterar", func() { iter.VerActual() })
+	require.PanicsWithValue(t, "El iterador termino de iterar", func() { iter.Borrar() })
+	require.PanicsWithValue(t, "El iterador termino de iterar", func() { iter.Avanzar() })
+}
+
+func TestIterExtInsertarPrincipio(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[string]()
+	iter := lista.Iterador()
+
+	require.False(t, iter.HayAlgoMas())
+
+	iter.Insertar("H")
+	require.Equal(t, "H", iter.VerActual())
+	iter.Avanzar()
+	require.False(t, iter.HayAlgoMas())
+}
+
+func TestIterExtInsertarFinal(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+	lista.InsertarPrimero(2)
+	lista.InsertarPrimero(1)
+	iter := lista.Iterador()
+
+	require.Equal(t, 1, iter.VerActual())
+	require.True(t, iter.HayAlgoMas())
+	iter.Avanzar()
+
+	require.Equal(t, 2, iter.VerActual())
+	require.True(t, iter.HayAlgoMas())
+	iter.Avanzar()
+
+	require.False(t, iter.HayAlgoMas())
+
+	iter.Insertar(3)
+	require.True(t, iter.HayAlgoMas())
+	require.Equal(t, 3, iter.VerActual())
+
+	iter.Avanzar()
+	require.False(t, iter.HayAlgoMas())
+}
+
+func TestIterExtInsertarMedio(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[string]()
+	lista.InsertarPrimero("la")
+	lista.InsertarPrimero("Ho")
+	iter := lista.Iterador()
+
+	require.Equal(t, "Ho", iter.VerActual())
+	require.True(t, iter.HayAlgoMas())
+	iter.Avanzar()
+
+	iter.Insertar("Esto va en el medio")
+
+	require.Equal(t, "Esto va en el medio", iter.VerActual())
+	require.True(t, iter.HayAlgoMas())
+	iter.Avanzar()
+
+	require.Equal(t, "la", iter.VerActual())
+	require.True(t, iter.HayAlgoMas())
+
+	iter.Avanzar()
+	require.False(t, iter.HayAlgoMas())
+}
+
+func TestIterExtBorrarPrimerElem(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[string]()
+	lista.InsertarPrimero("2")
+	lista.InsertarPrimero("1")
+
+	iter := lista.Iterador()
+	require.Equal(t, "1", iter.Borrar())
+	require.Equal(t, "2", iter.VerActual())
+
+	iter.Avanzar()
+	require.False(t, iter.HayAlgoMas())
+}
+
+func TestIterExtBorrarUltimoElem(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[bool]()
+	lista.InsertarUltimo(false)
+	lista.InsertarUltimo(true)
+	lista.InsertarUltimo(true)
+
+	iter := lista.Iterador()
+
+	require.Equal(t, false, iter.VerActual())
+	iter.Avanzar()
+	require.True(t, iter.HayAlgoMas())
+
+	require.Equal(t, true, iter.VerActual())
+	iter.Avanzar()
+	require.True(t, iter.HayAlgoMas())
+
+	require.Equal(t, true, iter.VerActual())
+	require.Equal(t, true, iter.Borrar())
+}
+
+func TestIterExtBorrarMedio(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[bool]()
+	lista.InsertarUltimo(false)
+	lista.InsertarUltimo(true)
+	lista.InsertarUltimo(false)
+
+	iter := lista.Iterador()
+
+	require.Equal(t, false, iter.VerActual())
+	iter.Avanzar()
+	require.True(t, iter.HayAlgoMas())
+
+	require.Equal(t, true, iter.VerActual())
+	require.Equal(t, true, iter.Borrar())
+
+	require.Equal(t, false, iter.VerActual())
+	require.True(t, iter.HayAlgoMas())
 }

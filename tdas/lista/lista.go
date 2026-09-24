@@ -1,6 +1,6 @@
 package lista
 
-type Lista[T any] interface{
+type Lista[T any] interface {
 	// Devuelve true en caso de que la lista no tenga elementos, false en caso de que si tenga aun elementos
 	EstaVacia() bool
 	// Inserta un elemento de tipo T en la primer posicion de la lista
@@ -15,15 +15,14 @@ type Lista[T any] interface{
 	VerUltimo() T
 	// Devuelve la cantidad de posiciones de la lista
 	Largo() int
-	// Funcion que aplica la funcion visitar que es utilizada por el iterador interno para recorrer la lista y devolver 
+	// Funcion que aplica la funcion visitar que es utilizada por el iterador interno para recorrer la lista y devolver
 	// true en caso de haber recorrido todos los elementos de la lista o false en caso de no lograrlo
 	Iterar(visitar func(T) bool)
 	// Iterador devuelve un IteradorLista de tipo T posicionado al principio de la lista, que permite modificar la misma
 	Iterador() IteradorLista[T]
 }
 
-
-type IteradorLista[T any] interface{
+type IteradorLista[T any] interface {
 	// Devuelve la posicion actual donde se encuentra posicionado el iterador externo
 	// Si el iterador ya termino de iterar, entra en panico con un mensaje
 	// "El iterador termino de iterar".
@@ -43,4 +42,3 @@ type IteradorLista[T any] interface{
 	// panico con un mensaje "El iterador termino de iterar".
 	Borrar() T
 }
-
