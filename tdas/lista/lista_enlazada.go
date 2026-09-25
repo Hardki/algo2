@@ -101,21 +101,56 @@ func (lista *listaEnlazada[T]) Iterador() IteradorLista[T]{
 
 
 func (iterador *iteradorListaEnlazada[T]) VerActual() T {
-	panic("TODO: implementar VerActual")
+	if iterador.actual == nil {
+		panic("El iterador termino de iterar")
+	}
+	return iterador.actual.dato
 }
 
 func (iterador *iteradorListaEnlazada[T]) HayAlgoMas() bool {
-	panic("TODO: implementar HayAlgoMas")
+	return iterador.actual != nil
 }
 
 func (iterador *iteradorListaEnlazada[T]) Avanzar() {
-	panic("TODO: implementar Avanzar")
+	if iterador.actual == nil {
+		panic("El iterador termino de iterar")
+	}
+	anteriorAux:= iterador.actual
+	iterador.anterior = anteriorAux
+	iterador.actual = iterador.actual.prox
 }
 
 func (iterador *iteradorListaEnlazada[T]) Insertar(elemento T) {
-	panic("TODO: implementar Insertar")
+	nodo:=&nodoLista[T]{dato:elemento, prox:iterador.actual}
+	if iterador.anterior == nil{
+		iterador.lista.primero = nodo
+	}else{
+		iterador.anterior.prox = nodo
+	}
+	if !iterador.HayAlgoMas(){
+		iterador.lista.ultimo = nodo
+	}
+	iterador.actual = nodo
+	iterador.lista.longitud++
 }
 
 func (iterador *iteradorListaEnlazada[T]) Borrar() T {
-	panic("TODO: implementar Borrar")
+	if !iterador.HayAlgoMas(){
+		panic("El iterador termino de iterar")
+	}
+	var elemento T
+	if iterador.anterior == nil{
+		elemento = iterador.actual.dato
+		iterador.lista.primero = iterador.actual.prox
+	}else{
+		elemento = iterador.actual.dato
+		iterador.anterior.prox = iterador.actual.prox
+	}
+	iterador.actual = iterador.actual.prox
+	if !iterador.HayAlgoMas(){
+		iterador.lista.ultimo = iterador.anterior
+	}
+	iterador.lista.longitud--
+
+	return elemento
 }
